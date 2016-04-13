@@ -243,11 +243,12 @@ public class LiquidLoaderFull : UIView {
         liquidLoader.show()
     }
     
-    public func show(completion: (Void -> Void)? = nil) {
+    public func show(text: String?, completion: (Void -> Void)? = nil) {
         if hidden {
             alpha = 0
             hidden = false
         }
+        textLabel.text = text
         if superview == nil {
             UIApplication.sharedApplication().keyWindow?.addSubview(self)
             addedToKeyWindow = true
