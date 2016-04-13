@@ -48,6 +48,8 @@ public class LiquidLoader : UIView {
     public required init?(coder aDecoder: NSCoder) {
         self.effect = .Circle(UIColor.whiteColor())
         super.init(coder: aDecoder)
+        self.hidden = true
+        self.userInteractionEnabled = false
         self.effectDelegate = self.effect.setup(self)
     }
 
@@ -64,77 +66,47 @@ public class LiquidLoaderFull : UIView {
     public let liquidLoader: LiquidLoader
     public var animationDuration: NSTimeInterval = 0.3
     
+    private var addedToKeyWindow: Bool = false
+    
     public init(size: CGSize, effect: Effect) {
         liquidLoader = LiquidLoader(frame: CGRect(origin: CGPoint.zero, size: size), effect: effect)
         super.init(frame: UIScreen.mainScreen().bounds)
-        liquidLoader.translatesAutoresizingMaskIntoConstraints = false
         addSubview(liquidLoader)
-        addConstraint(NSLayoutConstraint(
-            item: liquidLoader,
-            attribute: NSLayoutAttribute.CenterX,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterX,
-            multiplier: 1,
-            constant: 0)
-        )
-        addConstraint(NSLayoutConstraint(
-            item: liquidLoader,
-            attribute: NSLayoutAttribute.CenterY,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterY,
-            multiplier: 1,
-            constant: 0)
-        )
-        backgroundColor = UIColor(white: 0.25, alpha: 0.25)
+        liquidLoader.center = center
+        liquidLoader.autoresizingMask = [UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleRightMargin]
+        backgroundColor = UIColor(white: 0, alpha: 0.25)
+        autoresizingMask = [UIViewAutoresizing.FlexibleHeight, UIViewAutoresizing.FlexibleWidth]
         userInteractionEnabled = true
         hidden = true
         liquidLoader.show()
-        layoutIfNeeded()
     }
     
     public required init?(coder aDecoder: NSCoder) {
         liquidLoader = LiquidLoader(frame: CGRect(x: 0, y: 0, width: 50, height: 50), effect: Effect.Circle(UIColor.whiteColor()))
         super.init(coder: aDecoder)
-        liquidLoader.translatesAutoresizingMaskIntoConstraints = false
         addSubview(liquidLoader)
-        addConstraint(NSLayoutConstraint(
-            item: liquidLoader,
-            attribute: NSLayoutAttribute.CenterX,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterX,
-            multiplier: 1,
-            constant: 0)
-        )
-        addConstraint(NSLayoutConstraint(
-            item: liquidLoader,
-            attribute: NSLayoutAttribute.CenterY,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterY,
-            multiplier: 1,
-            constant: 0)
-        )
-        backgroundColor = UIColor(white: 0.25, alpha: 0.25)
+        liquidLoader.center = center
+        liquidLoader.autoresizingMask = [UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleRightMargin]
+        backgroundColor = UIColor(white: 0, alpha: 0.25)
         userInteractionEnabled = true
         hidden = true
         liquidLoader.show()
-        layoutIfNeeded()
     }
     
     public func show(completion: (Void -> Void)? = nil) {
-        layoutIfNeeded()
         if hidden {
             alpha = 0
             hidden = false
+        }
+        if superview == nil {
+            UIApplication.sharedApplication().keyWindow?.addSubview(self)
+            addedToKeyWindow = true
         }
         UIView.animateWithDuration(
             animationDuration,
             delay: 0,
             options: [UIViewAnimationOptions.AllowAnimatedContent, UIViewAnimationOptions.BeginFromCurrentState],
-            animations: { 
+            animations: {
                 self.alpha = 1
             },
             completion: { _ in
@@ -143,7 +115,6 @@ public class LiquidLoaderFull : UIView {
     }
     
     public func hide(completion: (Void -> Void)? = nil) {
-        layoutIfNeeded()
         UIView.animateWithDuration(
             animationDuration,
             delay: 0,
@@ -153,54 +124,11 @@ public class LiquidLoaderFull : UIView {
             },
             completion: { _ in
                 self.hidden = true
+                if self.addedToKeyWindow {
+                    self.removeFromSuperview()
+                }
                 completion?()
         })
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
