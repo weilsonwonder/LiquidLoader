@@ -63,7 +63,7 @@ class LiquidLoadEffect : NSObject {
         }
         resize()
 
-        var timer = NSTimer.scheduledTimerWithTimeInterval(0.02, target: self, selector: Selector("update"), userInfo: nil, repeats: true)
+        var timer = NSTimer.scheduledTimerWithTimeInterval(0.02, target: self, selector: #selector(LiquidLoadEffect.update), userInfo: nil, repeats: true)
     }
     
     func updateKeyframe(key: CGFloat) {
