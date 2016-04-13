@@ -281,5 +281,10 @@ public class LiquidLoaderFull : UIView {
                 completion?()
         })
     }
+    
+    public func changeLoadingText(text: String?) {
+        textLabel.text = text
+        layoutIfNeeded()
+    }
 }
 
