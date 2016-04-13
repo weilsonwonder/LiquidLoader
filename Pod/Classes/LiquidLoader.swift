@@ -358,7 +358,7 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         completion?()
     }
     
-    public func show(text: String?, animated: Bool, completion: (Void -> Void)? = nil) {
+    public func show(text: String?, completion: (Void -> Void)? = nil) {
         self.completion = completion
         isShow = true
         
@@ -384,7 +384,7 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
     private var completion: (Void -> Void)?
     private var isShow: Bool = true
     
-    public func hide(animated animated: Bool, completion: (Void -> Void)? = nil) {
+    public func hide(completion: (Void -> Void)? = nil) {
         self.completion = completion
         isShow = false
         dynamicAnimatorDidPause(animator)
