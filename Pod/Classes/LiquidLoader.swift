@@ -62,20 +62,25 @@ public class LiquidLoader : UIView {
     }
 }
 
-public class LiquidLoaderFull : UIView {
+public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
+    
+    private var animator: UIDynamicAnimator!
+    private var centerXConstraint: NSLayoutConstraint!
+    private var centerYConstraint: NSLayoutConstraint!
+    
     public let textLabel: UILabel
     public let liquidLoader: LiquidLoader
-    public var animationDuration: NSTimeInterval = 2
+    public var animationDuration: NSTimeInterval = 3
     public var cornerRadius: CGFloat = 12 {
         didSet {
             backgroundView.layer.cornerRadius = cornerRadius
         }
     }
     
+    private let backgroundView: UIVisualEffectView
     private var addedToKeyWindow: Bool = false
     private let lineDiameterMultiplier: CGFloat = 0.1
     private let circleDiameterMultiplier: CGFloat = 1.0
-    private let backgroundView: UIVisualEffectView
     
     public convenience init(width: CGFloat, effect: Effect) {
         self.init(width: width, effect: effect, style: UIBlurEffect(style: UIBlurEffectStyle.Dark))
@@ -99,28 +104,53 @@ public class LiquidLoaderFull : UIView {
         textLabel = UILabel()
         super.init(frame: UIScreen.mainScreen().bounds)
         
+        animator = UIDynamicAnimator(referenceView: self)
+        animator.delegate = self
+        
         addSubview(backgroundView)
         backgroundView.layer.masksToBounds = true
         backgroundView.layer.cornerRadius = cornerRadius
         backgroundView.translatesAutoresizingMaskIntoConstraints = false
-        addConstraint(NSLayoutConstraint(
+        centerYConstraint = NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.CenterY,
+            relatedBy: NSLayoutRelation.Equal,
+            toItem: self,
+            attribute: NSLayoutAttribute.CenterY,
+            multiplier: 1,
+            constant: 0
+        )
+        centerXConstraint = NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.CenterX,
+            relatedBy: NSLayoutRelation.Equal,
+            toItem: self,
+            attribute: NSLayoutAttribute.CenterX,
+            multiplier: 1,
+            constant: 0
+        )
+        let topC = NSLayoutConstraint(
             item: backgroundView,
             attribute: NSLayoutAttribute.Top,
             relatedBy: NSLayoutRelation.GreaterThanOrEqual,
             toItem: self,
             attribute: NSLayoutAttribute.Top,
             multiplier: 1,
-            constant: 20)
+            constant: 20
         )
-        addConstraint(NSLayoutConstraint(
+        let bottomC = NSLayoutConstraint(
             item: self,
             attribute: NSLayoutAttribute.Bottom,
             relatedBy: NSLayoutRelation.GreaterThanOrEqual,
             toItem: backgroundView,
             attribute: NSLayoutAttribute.Bottom,
             multiplier: 1,
-            constant: 20)
+            constant: 20
         )
+        topC.priority = UILayoutPriorityDefaultHigh
+        bottomC.priority = UILayoutPriorityDefaultHigh
+        addConstraint(topC)
+        addConstraint(bottomC)
         addConstraint(NSLayoutConstraint(
             item: backgroundView,
             attribute: NSLayoutAttribute.Leading,
@@ -128,8 +158,8 @@ public class LiquidLoaderFull : UIView {
             toItem: self,
             attribute: NSLayoutAttribute.Leading,
             multiplier: 1,
-            constant: 20)
-        )
+            constant: 20
+            ))
         addConstraint(NSLayoutConstraint(
             item: self,
             attribute: NSLayoutAttribute.Trailing,
@@ -137,26 +167,10 @@ public class LiquidLoaderFull : UIView {
             toItem: backgroundView,
             attribute: NSLayoutAttribute.Trailing,
             multiplier: 1,
-            constant: 20)
-        )
-        addConstraint(NSLayoutConstraint(
-            item: backgroundView,
-            attribute: NSLayoutAttribute.CenterX,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterX,
-            multiplier: 1,
-            constant: 0)
-        )
-        addConstraint(NSLayoutConstraint(
-            item: backgroundView,
-            attribute: NSLayoutAttribute.CenterY,
-            relatedBy: NSLayoutRelation.Equal,
-            toItem: self,
-            attribute: NSLayoutAttribute.CenterY,
-            multiplier: 1,
-            constant: 0)
-        )
+            constant: 20
+            ))
+        addConstraint(centerXConstraint)
+        addConstraint(centerYConstraint)
         addConstraint(NSLayoutConstraint(
             item: backgroundView,
             attribute: NSLayoutAttribute.Width,
@@ -206,20 +220,107 @@ public class LiquidLoaderFull : UIView {
     }
     
     public required init?(coder aDecoder: NSCoder) {
-        backgroundView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.Light))
-        liquidLoader = LiquidLoader(frame: CGRect(x: 0, y: 0, width: 50, height: 50), effect: Effect.Circle(UIColor.whiteColor()))
+        let width: CGFloat = 140
+        let effect = Effect.Line(UIColor.whiteColor())
+        let style = UIBlurEffect(style: UIBlurEffectStyle.Dark)
+        
+        backgroundView = UIVisualEffectView(effect: style)
+        let liquidLoaderHeight: CGFloat = width * lineDiameterMultiplier
+        
+        liquidLoader = LiquidLoader(frame: CGRect(x: 0, y: 0, width: width, height: liquidLoaderHeight), effect: effect)
         textLabel = UILabel()
-        super.init(coder: aDecoder)
-        addSubview(liquidLoader)
-        liquidLoader.center = center
-        liquidLoader.autoresizingMask = [UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleTopMargin, UIViewAutoresizing.FlexibleRightMargin]
-        addSubview(textLabel)
+        super.init(frame: UIScreen.mainScreen().bounds)
+        
+        animator = UIDynamicAnimator(referenceView: self)
+        animator.delegate = self
+        
+        addSubview(backgroundView)
+        backgroundView.layer.masksToBounds = true
+        backgroundView.layer.cornerRadius = cornerRadius
+        backgroundView.translatesAutoresizingMaskIntoConstraints = false
+        centerYConstraint = NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.CenterY,
+            relatedBy: NSLayoutRelation.Equal,
+            toItem: self,
+            attribute: NSLayoutAttribute.CenterY,
+            multiplier: 1,
+            constant: 0
+        )
+        centerXConstraint = NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.CenterX,
+            relatedBy: NSLayoutRelation.Equal,
+            toItem: self,
+            attribute: NSLayoutAttribute.CenterX,
+            multiplier: 1,
+            constant: 0
+        )
+        let topC = NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.Top,
+            relatedBy: NSLayoutRelation.GreaterThanOrEqual,
+            toItem: self,
+            attribute: NSLayoutAttribute.Top,
+            multiplier: 1,
+            constant: 20
+        )
+        let bottomC = NSLayoutConstraint(
+            item: self,
+            attribute: NSLayoutAttribute.Bottom,
+            relatedBy: NSLayoutRelation.GreaterThanOrEqual,
+            toItem: backgroundView,
+            attribute: NSLayoutAttribute.Bottom,
+            multiplier: 1,
+            constant: 20
+        )
+        topC.priority = UILayoutPriorityDefaultHigh
+        bottomC.priority = UILayoutPriorityDefaultHigh
+        addConstraint(topC)
+        addConstraint(bottomC)
+        addConstraint(NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.Leading,
+            relatedBy: NSLayoutRelation.GreaterThanOrEqual,
+            toItem: self,
+            attribute: NSLayoutAttribute.Leading,
+            multiplier: 1,
+            constant: 20
+            ))
+        addConstraint(NSLayoutConstraint(
+            item: self,
+            attribute: NSLayoutAttribute.Trailing,
+            relatedBy: NSLayoutRelation.GreaterThanOrEqual,
+            toItem: backgroundView,
+            attribute: NSLayoutAttribute.Trailing,
+            multiplier: 1,
+            constant: 20
+            ))
+        addConstraint(centerXConstraint)
+        addConstraint(centerYConstraint)
+        addConstraint(NSLayoutConstraint(
+            item: backgroundView,
+            attribute: NSLayoutAttribute.Width,
+            relatedBy: NSLayoutRelation.GreaterThanOrEqual,
+            toItem: nil,
+            attribute: NSLayoutAttribute.NotAnAttribute,
+            multiplier: 1,
+            constant: width + 40)
+        )
+        
+        backgroundView.addSubview(liquidLoader)
+        backgroundView.frame = CGRect(x: 0, y: 0, width: width + 40, height: liquidLoaderHeight + 100)
+        liquidLoader.frame = CGRect(x: 20, y: 20, width: width, height: liquidLoaderHeight)
+        liquidLoader.autoresizingMask = [UIViewAutoresizing.FlexibleBottomMargin, UIViewAutoresizing.FlexibleLeftMargin, UIViewAutoresizing.FlexibleRightMargin]
+        
+        backgroundView.addSubview(textLabel)
         textLabel.textAlignment = NSTextAlignment.Center
         textLabel.numberOfLines = 0
+        textLabel.textColor = UIColor.whiteColor()
         textLabel.adjustsFontSizeToFitWidth = true
         textLabel.translatesAutoresizingMaskIntoConstraints = false
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[tl]-|", options: [], metrics: nil, views: ["tl": textLabel]))
-        addConstraint(NSLayoutConstraint(
+        backgroundView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-[tl]-|", options: [], metrics: nil, views: ["tl": textLabel]))
+        backgroundView.addConstraint(NSLayoutConstraint(
             item: textLabel,
             attribute: NSLayoutAttribute.Top,
             relatedBy: NSLayoutRelation.Equal,
@@ -228,63 +329,109 @@ public class LiquidLoaderFull : UIView {
             multiplier: 1,
             constant: 8)
         )
-        addConstraint(NSLayoutConstraint(
-            item: textLabel,
+        backgroundView.addConstraint(NSLayoutConstraint(
+            item: backgroundView,
             attribute: NSLayoutAttribute.Bottom,
-            relatedBy: NSLayoutRelation.LessThanOrEqual,
-            toItem: self,
+            relatedBy: NSLayoutRelation.Equal,
+            toItem: textLabel,
             attribute: NSLayoutAttribute.Bottom,
             multiplier: 1,
-            constant: 8)
+            constant: 20)
         )
+        
         backgroundColor = UIColor(white: 0, alpha: 0.25)
+        autoresizingMask = [UIViewAutoresizing.FlexibleHeight, UIViewAutoresizing.FlexibleWidth]
         userInteractionEnabled = true
         hidden = true
         liquidLoader.show()
     }
     
-    public func show(text: String?, completion: (Void -> Void)? = nil) {
-        if hidden {
-            alpha = 0
-            hidden = false
+    public func dynamicAnimatorDidPause(animator: UIDynamicAnimator) {
+        animator.removeAllBehaviors()
+        if !isShow {
+            hidden = true
+            if addedToKeyWindow {
+                removeFromSuperview()
+                addedToKeyWindow = false
+            }
         }
+        completion?()
+    }
+    
+    public func show(text: String?, animated: Bool, completion: (Void -> Void)? = nil) {
+        self.completion = completion
+        isShow = true
+        
+        hidden = false
         textLabel.text = text
         if superview == nil {
             UIApplication.sharedApplication().keyWindow?.addSubview(self)
             addedToKeyWindow = true
         }
-        UIView.animateWithDuration(
-            animationDuration,
-            delay: 0,
-            options: [UIViewAnimationOptions.AllowAnimatedContent, UIViewAnimationOptions.BeginFromCurrentState],
-            animations: {
-                self.alpha = 1
-            },
-            completion: { _ in
-                completion?()
-        })
+        
+        let dynamicHub = DynamicHub()
+        dynamicHub.center = CGPoint(x: 0, y: 40)
+        
+        let snapBehavior = UISnapBehavior(item: dynamicHub, snapToPoint: CGPoint.zero)
+        snapBehavior.damping = 0.25
+        snapBehavior.action = {
+            self.centerYConstraint.constant = -dynamicHub.center.y
+        }
+        
+        animator.addBehavior(snapBehavior)
     }
     
-    public func hide(completion: (Void -> Void)? = nil) {
-        UIView.animateWithDuration(
-            animationDuration,
-            delay: 0,
-            options: [UIViewAnimationOptions.AllowAnimatedContent, UIViewAnimationOptions.BeginFromCurrentState],
-            animations: {
-                self.alpha = 0
-            },
-            completion: { _ in
-                self.hidden = true
-                if self.addedToKeyWindow {
-                    self.removeFromSuperview()
-                }
-                completion?()
-        })
+    private var completion: (Void -> Void)?
+    private var isShow: Bool = true
+    
+    public func hide(animated animated: Bool, completion: (Void -> Void)? = nil) {
+        self.completion = completion
+        isShow = false
+        dynamicAnimatorDidPause(animator)
+        
+        //        let dynamicHub = DynamicHub()
+        //        dynamicHub.center = CGPoint.zero
+        //
+        //        let snapBehavior = UISnapBehavior(item: dynamicHub, snapToPoint: CGPoint(x: 0, y: -40))
+        //        snapBehavior.damping = 0.25
+        //        snapBehavior.action = {
+        //            self.centerYConstraint.constant = dynamicHub.center.y
+        //        }
+        //
+        //        animator.addBehavior(snapBehavior)
+        
+        //        let gravityBehavior = UIGravityBehavior(items: [dynamicHub])
+        //        gravityBehavior.action = {
+        //            self.centerYConstraint.constant = dynamicHub.center.y
+        //            print(dynamicHub.center.y)
+        //        }
+        //
+        //        animator.addBehavior(gravityBehavior)
+        //        NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(LiquidLoaderFull.killAnimator(_:)), userInfo: nil, repeats: false)
     }
+    
+    //    func killAnimator(timer: NSTimer) {
+    //        print("kill~")
+    //        timer.invalidate()
+    //        dynamicAnimatorDidPause(animator)
+    //    }
     
     public func changeLoadingText(text: String?) {
         textLabel.text = text
         layoutIfNeeded()
+    }
+}
+
+class DynamicHub: NSObject, UIDynamicItem {
+    var center: CGPoint
+    var bounds: CGRect
+    var transform: CGAffineTransform
+    
+    override init() {
+        bounds = UIScreen.mainScreen().bounds
+        center = CGPoint(x: 50, y: 50)
+        transform = CGAffineTransformIdentity
+        super.init()
     }
 }
 
