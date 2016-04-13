@@ -64,8 +64,8 @@ public class LiquidLoaderFull : UIView {
     public let liquidLoader: LiquidLoader
     public var animationDuration: NSTimeInterval = 0.3
     
-    public init(frame: CGRect, effect: Effect) {
-        liquidLoader = LiquidLoader(frame: frame, effect: effect)
+    public init(size: CGSize, effect: Effect) {
+        liquidLoader = LiquidLoader(frame: CGRect(origin: CGPoint.zero, size: size), effect: effect)
         super.init(frame: UIScreen.mainScreen().bounds)
         liquidLoader.translatesAutoresizingMaskIntoConstraints = false
         addSubview(liquidLoader)
