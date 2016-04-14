@@ -104,6 +104,11 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         textLabel = UILabel()
         super.init(frame: UIScreen.mainScreen().bounds)
         
+        
+        
+        
+        
+        
         animator = UIDynamicAnimator(referenceView: self)
         animator.delegate = self
         
@@ -366,6 +371,9 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         textLabel.text = text
         if superview == nil {
             UIApplication.sharedApplication().keyWindow?.addSubview(self)
+            translatesAutoresizingMaskIntoConstraints = false
+            UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[s]|", options: [], metrics: nil, views: ["s": self]))
+            UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[s]|", options: [], metrics: nil, views: ["s": self]))
             addedToKeyWindow = true
         }
         
@@ -388,33 +396,7 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         self.completion = completion
         isShow = false
         dynamicAnimatorDidPause(animator)
-        
-        //        let dynamicHub = DynamicHub()
-        //        dynamicHub.center = CGPoint.zero
-        //
-        //        let snapBehavior = UISnapBehavior(item: dynamicHub, snapToPoint: CGPoint(x: 0, y: -40))
-        //        snapBehavior.damping = 0.25
-        //        snapBehavior.action = {
-        //            self.centerYConstraint.constant = dynamicHub.center.y
-        //        }
-        //
-        //        animator.addBehavior(snapBehavior)
-        
-        //        let gravityBehavior = UIGravityBehavior(items: [dynamicHub])
-        //        gravityBehavior.action = {
-        //            self.centerYConstraint.constant = dynamicHub.center.y
-        //            print(dynamicHub.center.y)
-        //        }
-        //
-        //        animator.addBehavior(gravityBehavior)
-        //        NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(LiquidLoaderFull.killAnimator(_:)), userInfo: nil, repeats: false)
     }
-    
-    //    func killAnimator(timer: NSTimer) {
-    //        print("kill~")
-    //        timer.invalidate()
-    //        dynamicAnimatorDidPause(animator)
-    //    }
     
     public func changeLoadingText(text: String?) {
         textLabel.text = text
