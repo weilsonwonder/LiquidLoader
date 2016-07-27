@@ -104,11 +104,6 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         textLabel = UILabel()
         super.init(frame: UIScreen.mainScreen().bounds)
         
-        
-        
-        
-        
-        
         animator = UIDynamicAnimator(referenceView: self)
         animator.delegate = self
         
@@ -363,7 +358,7 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         completion?()
     }
     
-    public func show(text: String?, completion: (Void -> Void)? = nil) {
+    public func show(text: String?, completion: (() -> Void)? = nil) {
         self.completion = completion
         isShow = true
         
@@ -389,10 +384,10 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
         animator.addBehavior(snapBehavior)
     }
     
-    private var completion: (Void -> Void)?
+    private var completion: (() -> Void)?
     private var isShow: Bool = true
     
-    public func hide(completion: (Void -> Void)? = nil) {
+    public func hide(completion: (() -> Void)? = nil) {
         self.completion = completion
         isShow = false
         dynamicAnimatorDidPause(animator)
