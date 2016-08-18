@@ -54,11 +54,15 @@ public class LiquidLoader : UIView {
     }
 
     public func show() {
-        self.hidden = false
+        dispatch_async(dispatch_get_main_queue()) { 
+            self.hidden = false
+        }
     }
 
     public func hide() {
-        self.hidden = true
+        dispatch_async(dispatch_get_main_queue()) {
+            self.hidden = true
+        }
     }
 }
 
@@ -81,6 +85,9 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
     private var addedToKeyWindow: Bool = false
     private let lineDiameterMultiplier: CGFloat = 0.1
     private let circleDiameterMultiplier: CGFloat = 1.0
+    
+    private var completion: (() -> Void)?
+    private var isShow: Bool = true
     
     public convenience init(width: CGFloat, effect: Effect) {
         self.init(width: width, effect: effect, style: UIBlurEffect(style: UIBlurEffectStyle.Dark))
@@ -359,38 +366,40 @@ public class LiquidLoaderFull : UIView, UIDynamicAnimatorDelegate {
     }
     
     public func show(text: String?, completion: (() -> Void)? = nil) {
-        self.completion = completion
-        isShow = true
-        
-        hidden = false
-        textLabel.text = text
-        if superview == nil {
-            UIApplication.sharedApplication().keyWindow?.addSubview(self)
-            translatesAutoresizingMaskIntoConstraints = false
-            UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[s]|", options: [], metrics: nil, views: ["s": self]))
-            UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[s]|", options: [], metrics: nil, views: ["s": self]))
-            addedToKeyWindow = true
+        dispatch_async(dispatch_get_main_queue()) {
+            self.completion = completion
+            self.isShow = true
+            
+            self.hidden = false
+            self.textLabel.text = text
+            
+            if self.superview == nil {
+                UIApplication.sharedApplication().keyWindow?.addSubview(self)
+                self.translatesAutoresizingMaskIntoConstraints = false
+                UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[s]|", options: [], metrics: nil, views: ["s": self]))
+                UIApplication.sharedApplication().keyWindow?.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[s]|", options: [], metrics: nil, views: ["s": self]))
+                self.addedToKeyWindow = true
+            }
+            
+            let dynamicHub = DynamicHub()
+            dynamicHub.center = CGPoint(x: 0, y: 40)
+            
+            let snapBehavior = UISnapBehavior(item: dynamicHub, snapToPoint: CGPoint.zero)
+            snapBehavior.damping = 0.25
+            snapBehavior.action = {
+                self.centerYConstraint.constant = -dynamicHub.center.y
+            }
+            
+            self.animator.addBehavior(snapBehavior)
         }
-        
-        let dynamicHub = DynamicHub()
-        dynamicHub.center = CGPoint(x: 0, y: 40)
-        
-        let snapBehavior = UISnapBehavior(item: dynamicHub, snapToPoint: CGPoint.zero)
-        snapBehavior.damping = 0.25
-        snapBehavior.action = {
-            self.centerYConstraint.constant = -dynamicHub.center.y
-        }
-        
-        animator.addBehavior(snapBehavior)
     }
     
-    private var completion: (() -> Void)?
-    private var isShow: Bool = true
-    
     public func hide(completion: (() -> Void)? = nil) {
-        self.completion = completion
-        isShow = false
-        dynamicAnimatorDidPause(animator)
+        dispatch_async(dispatch_get_main_queue()) { 
+            self.completion = completion
+            self.isShow = false
+            self.dynamicAnimatorDidPause(self.animator)
+        }
     }
     
     public func changeLoadingText(text: String?) {
